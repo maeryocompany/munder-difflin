@@ -17,6 +17,7 @@ import {
   installContextLossRecovery, planInitFailure, DEFAULT_MAX_INIT_RETRIES
 } from './glRecovery';
 import type { Tile, Facing, ErrandKind, ErrandSpot } from './themeRegistry';
+import { localizeAction } from '../../i18n/actionText';
 
 // The map, tileset atlases, desk-claim order, errand spots, coffee-economy
 // tiles, prop anchors, monitor gids and palette all come from the active
@@ -149,7 +150,7 @@ function loadTexture(url: string): Promise<Texture> {
  *  gave it, then to a caller-supplied generic. Returns '' for the working state
  *  with nothing concrete yet — the bubble renders an animated "…" for that. */
 function liveActivity(agent: Agent, fallback = ''): string {
-  const action = (agent.action || '').trim();
+  const action = localizeAction(agent.action);
   if (action) return action;
   return firstWords(agent.lastPrompt) || fallback;
 }

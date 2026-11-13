@@ -1610,5 +1610,23 @@
     "filingDone": "filing it as done ✔",
     "stuck": "this one is stuck 😤",
     "gpuGiveUp": "The office floor could not get a GPU context.\n\nThe GPU may still be restarting, or too many terminals are\nusing it at once. Close a few agent terminals, or restart\nthe app, to bring the floor back."
+  },
+  "actionText": {
+    "awaiting": "awaiting",
+    "waitingOnYou": "waiting on you",
+    "waitingOnGod": "waiting on {{godName}}",
+    "reconnecting": "reconnecting…",
+    "archived": "archived",
+    "runningFloor": "running the floor",
+    "compacting": "compacting context",
+    "resumed": "resumed",
+    "thinking": "thinking",
+    "idle": "idle",
+    "readingInbox": "reading inbox",
+    "startingUp": "starting up",
+    "revived": "revived after sleep",
+    "badgeInstalled": "INSTALLED",
+    "badgeFirstRun": "INSTALLS ON FIRST RUN",
+    "badgeNotInstalled": "NOT INSTALLED"
   }
 }

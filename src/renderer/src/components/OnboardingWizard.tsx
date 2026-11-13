@@ -466,7 +466,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                         </span>
                         {(() => {
                           const a = classifyEngineAvailability(engines, p.id);
-                          const badge = engineAvailabilityBadge(a);
+                          const badge = engineAvailabilityBadge(a) && t(a.state === 'installed' ? 'actionText.badgeInstalled' : a.state === 'installs-on-first-run' ? 'actionText.badgeFirstRun' : 'actionText.badgeNotInstalled');
                           if (!badge) return null;
                           const bad = a.state === 'not-installable';
                           return (
