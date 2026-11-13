@@ -605,7 +605,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     setSlackBusy(true); setSlackNote('');
     try {
       await window.cth.slackSetConfig(slackPatch(slackEnabled));
-      setSlackNote('saved');
+      setSlackNote(t('settingsNotes.saved'));
     } catch (e) {
       setSlackNote(e instanceof Error ? e.message : String(e));
     } finally { setSlackBusy(false); }
@@ -622,9 +622,9 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
         setRunning(true);
         // Keep the last URL if this start returned none (tunnel hiccup) - don't blank it.
         if (res.url) setTunnelUrl(res.url);
-        setSlackNote(res.url ? 'listening' : (res.error ?? 'started, but tunnel unavailable'));
+        setSlackNote(res.url ? t('settingsNotes.listening') : (res.error ?? t('settingsNotes.tunnelUnavailable')));
       } else {
-        setSlackNote(res.error ?? 'failed to start');
+        setSlackNote(res.error ?? t('settingsNotes.failedToStart'));
       }
     } catch (e) {
       setSlackNote(e instanceof Error ? e.message : String(e));
@@ -636,7 +636,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     // Keep the last Request URL visible (greyed) after Stop.
     // Mirror startSlack: main persists slackEnabled:false, this keeps the pill
     // honest without waiting for a Settings reopen.
-    try { await window.cth.slackStop(); setRunning(false); setSlackEnabled(false); setSlackNote('stopped'); }
+    try { await window.cth.slackStop(); setRunning(false); setSlackEnabled(false); setSlackNote(t('settingsNotes.stopped')); }
     catch (e) { setSlackNote(e instanceof Error ? e.message : String(e)); }
     finally { setSlackBusy(false); }
   };
@@ -651,8 +651,8 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     setWebhookBusy(true); setWebhookNote('');
     try {
       const res = await triggersApi().saveWebhooks(list);
-      if (res && res.ok === false) { setWebhookNote(res.error ?? 'could not save'); return; }
-      setWebhookNote('saved');
+      if (res && res.ok === false) { setWebhookNote(res.error ?? t('settingsNotes.couldNotSave')); return; }
+      setWebhookNote(t('settingsNotes.saved'));
       setTimeout(() => setWebhookNote(''), 1500);
     } catch (e) {
       setWebhookNote(e instanceof Error ? e.message : String(e));
@@ -674,7 +674,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     } catch (e) {
       setWebhookNote(e instanceof Error ? e.message : String(e));
     } finally { setWebhookBusy(false); }
-    if (!secret) { setWebhookNote('could not generate a secret'); return; }
+    if (!secret) { setWebhookNote(t('settingsNotes.noSecret')); return; }
     const entry: WebhookTrigger = {
       id: newWebhookId(),
       name: `Webhook ${webhookTriggers.length + 1}`,
@@ -699,10 +699,10 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     } catch (e) {
       setWebhookNote(e instanceof Error ? e.message : String(e));
     } finally { setWebhookBusy(false); }
-    if (!secret) { setWebhookNote('could not generate a secret'); return; }
+    if (!secret) { setWebhookNote(t('settingsNotes.noSecret')); return; }
     setShownSecrets((s) => ({ ...s, [id]: true }));
     await patchWebhook(id, { secret });
-    setWebhookNote('new secret — copy it now');
+    setWebhookNote(t('settingsNotes.newSecret'));
   };
 
   const removeWebhook = async (id: string) => {
@@ -710,7 +710,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     setWebhookBusy(true); setWebhookNote('');
     try {
       await triggersApi().deleteWebhook(id);
-      setWebhookNote('deleted');
+      setWebhookNote(t('settingsNotes.deleted'));
       setTimeout(() => setWebhookNote(''), 1500);
     } catch (e) {
       setWebhookNote(e instanceof Error ? e.message : String(e));
@@ -732,8 +732,8 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     setOrgBusy(true); setOrgNote('');
     try {
       const res = await triggersApi().setOrgTrigger(next);
-      if (res && res.ok === false) { setOrgNote(res.error ?? 'could not save'); return; }
-      setOrgNote('saved');
+      if (res && res.ok === false) { setOrgNote(res.error ?? t('settingsNotes.couldNotSave')); return; }
+      setOrgNote(t('settingsNotes.saved'));
       setTimeout(() => setOrgNote(''), 1500);
     } catch (e) {
       setOrgNote(e instanceof Error ? e.message : String(e));
@@ -799,7 +799,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
     if (changeMode === 'fresh') clearLocalState();
     try {
       const res = await window.cth.changeHome(changeHome, changeMode);
-      if (!res.ok) { setChangeErr(res.error ?? 'Could not change the home folder.'); setChangeBusy(false); }
+      if (!res.ok) { setChangeErr(res.error ?? t('settingsNotes.couldNotChangeHome')); setChangeBusy(false); }
       // ok === true never returns (the process relaunches).
     } catch (e) {
       setChangeErr(e instanceof Error ? e.message : String(e));
@@ -1497,7 +1497,7 @@ export function SettingsModal({ config, onClose, initialSection }: SettingsModal
                             boxShadow: 'inset 0 0 0 1px var(--cth-ink-300)',
                             fontFamily: 'var(--cth-font-mono)', fontSize: 11, lineHeight: '16px',
                             color: 'var(--cth-ink-700)'
-                          }}>{SLACK_CONNECT_STEPS}</pre>
+                          }}>{t('settingsNotes.slackSteps')}</pre>
                         )}
 
                         {slackEnabled && (

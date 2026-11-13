@@ -375,8 +375,7 @@ export function AddAgentModal({ onClose, config, onConfigChange }: AddAgentModal
     const res = await window.cth.importHireFiles();
     if (res.manifests.length > 0) enqueuePendingHires(res.manifests);
     if (res.errors.length > 0) {
-      const noun = res.errors.length === 1 ? 'file' : 'files';
-      setError(`Skipped ${res.errors.length} invalid ${noun}: ${res.errors.join(' · ')}`);
+      setError(tr('misc.skippedFiles', { count: res.errors.length, errors: res.errors.join(' · ') }));
     } else if (!res.ok && res.error && res.error !== 'cancelled') {
       setError(res.error);
     }
@@ -461,7 +460,7 @@ export function AddAgentModal({ onClose, config, onConfigChange }: AddAgentModal
       cwd: spawnedCwd,
       goal: goal.trim() || undefined,
       status: 'idle',
-      action: resuming && spawnRes.resumeNotFound ? 'session not found — fresh start' : 'starting up',
+      action: resuming && spawnRes.resumeNotFound ? tr('misc.sessionNotFound') : 'starting up',
       progress: 0,
       currentStation: 'desk',
       ptyId,
@@ -787,8 +786,8 @@ export function AddAgentModal({ onClose, config, onConfigChange }: AddAgentModal
                               </button>
                               <button
                                 onClick={() => unregisterProject(r)}
-                                title={`Remove ${basename(r)} from this list. The folder itself is left alone.`}
-                                aria-label={`Remove ${basename(r)} from the project list`}
+                                title={tr('misc.removeProjectTitle', { name: basename(r) })}
+                                aria-label={tr('misc.removeProjectAria', { name: basename(r) })}
                                 style={{
                                   padding: '3px 6px 1px 2px',
                                   background: 'transparent',

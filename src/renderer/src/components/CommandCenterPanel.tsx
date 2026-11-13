@@ -442,9 +442,9 @@ function FloorTab({ seed }: { seed: { text: string; seq: number } }) {
         const registry = await window.cth.hiveRegistry();
         resumeSessionId = registry.agents[a.id]?.sessionId;
         if (!resumeSessionId) {
-          giveUpOnResume('No recorded session ID; current process was left running.');
+          giveUpOnResume(t('misc.noSessionId'));
         } else if (provider === 'claude' && !(await window.cth.resolveSessionCwd(resumeSessionId))) {
-          giveUpOnResume('Session transcript not found; current process was left running.');
+          giveUpOnResume(t('misc.transcriptNotFound'));
         }
       }
       // Capture the live grid before replacing anything. Restart & Continue
@@ -581,7 +581,7 @@ function FloorTab({ seed }: { seed: { text: string; seq: number } }) {
 
   const fetchIssues = async () => {
     const repo = issueRepo || repos[0];
-    if (!repo) { setIssuesError('No repo selected.'); return; }
+    if (!repo) { setIssuesError(t('commandCenter.noRepoSelected')); return; }
     setIssuesLoading(true);
     setIssuesError(null);
     try {
@@ -590,7 +590,7 @@ function FloorTab({ seed }: { seed: { text: string; seq: number } }) {
         setIssues((res.issues ?? []).slice(0, 10));
       } else {
         setIssues([]);
-        setIssuesError(res.error ?? 'Failed to fetch issues.');
+        setIssuesError(res.error ?? t('commandCenter.fetchFailed'));
       }
     } catch (e) {
       setIssues([]);

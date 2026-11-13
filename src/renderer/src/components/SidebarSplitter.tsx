@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState } from 'react';
 
 export interface SidebarSplitterProps {
@@ -19,6 +20,7 @@ export function SidebarSplitter({
   width, onChange, viewportWidth, min = 320, max = 1200
 }: SidebarSplitterProps) {
   const startRef = useRef<{ clientX: number; width: number } | null>(null);
+  const { t } = useTranslation();
   const [active, setActive] = useState(false);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function SidebarSplitter({
         e.preventDefault();
       }}
       onDoubleClick={() => onChange(420)}
-      title="Drag to resize · double-click to reset"
+      title={t('misc.splitterTitle')}
       style={{
         width: 10,
         cursor: 'ew-resize',

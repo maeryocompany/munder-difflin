@@ -14,7 +14,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { summarizeReleaseNotes } from '@shared/releaseNotes';
-import { describeUpdateSettings, manualDownloadUrl, manualInstallSteps, pendingVersion, reduceStatus, clampPercent, type UpdateStatus } from '@shared/updateState';
+import { localizedInstallSteps } from '../i18n/updateText';
+import { describeUpdateSettings, manualDownloadUrl, pendingVersion, reduceStatus, clampPercent, type UpdateStatus } from '@shared/updateState';
 import { PixelButton } from './PixelButton';
 
 declare const __APP_VERSION__: string;
@@ -38,7 +39,7 @@ export function UpdatesSection() {
   /** The manual path is always on offer next to the automatic one. */
   const pending = pendingVersion(status, __APP_VERSION__);
   const [manualStarted, setManualStarted] = useState<string | null>(null);
-  const steps = manualInstallSteps(window.cth.platform ?? 'darwin');
+  const steps = localizedInstallSteps(t, window.cth.platform ?? 'darwin');
   const downloadManually = () => {
     if (!status) return;
     const url = manualDownloadUrl(status, window.cth.platform, window.cth.arch);

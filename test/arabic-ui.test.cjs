@@ -39,6 +39,9 @@ const strip = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm,
 const en = locale('en');
 const ar = locale('ar');
 const zh = locale('zh-CN');
+// Korean-edition namespaces live in en/ko only; zh-CN and ar fall back to English for them.
+const KO_EDITION_NS = require('./ko-edition-namespaces.cjs');
+const enShared = Object.fromEntries(Object.entries(en).filter(([ns]) => !KO_EDITION_NS.has(ns)));
 
 // --- the gate: inert for everyone who did not pick Arabic ------------------
 
@@ -171,9 +174,9 @@ test('no unbundled webfont rides in with the Arabic locale', () => {
 
 // --- coverage and shape: what makes a PARTIAL translation safe -------------
 
-test('English is still the default, and still not auto-detected', () => {
+test('the default language is fixed (Korean edition) and still not auto-detected', () => {
   const code = strip(read('src/renderer/src/i18n/index.ts'));
-  assert.match(code, /return 'en';/, 'the fallback language must stay English');
+  assert.match(code, /DEFAULT_LANGUAGE = 'ko'/, 'the Korean edition must start in Korean');
   assert.match(code, /fallbackLng: 'en'/, 'a missing Arabic key must fall back to English');
   assert.ok(!code.includes('navigator'),
     'adding a locale must not turn on OS auto-detect');
@@ -187,7 +190,7 @@ test('ar is registered everywhere a language has to be registered', () => {
 });
 
 test('every locale has exactly the same key tree', () => {
-  const e = pathsOf(en), a = pathsOf(ar), z = pathsOf(zh);
+  const e = pathsOf(enShared), a = pathsOf(ar), z = pathsOf(zh);
   const missing = [...e.keys()].filter((k) => !a.has(k));
   const extra = [...a.keys()].filter((k) => !e.has(k));
   assert.deepEqual(missing, [], 'ar is missing keys — they would silently fall back');
@@ -213,7 +216,7 @@ test('no Arabic string is left as its English source', () => {
     'mcpDefaults.toggleNote',                // "{{id}}: {{state}}" — pure interpolation
     'webhooksSection.summary'                // "{{count}} · {{state}}" — same
   ]);
-  const e = pathsOf(en), a = pathsOf(ar);
+  const e = pathsOf(enShared), a = pathsOf(ar);
   const untranslated = [];
   for (const [k, v] of e) {
     if (typeof v !== 'string' || !/[A-Za-z]{4}/.test(v)) continue; // symbols, ids, brands
@@ -228,7 +231,7 @@ test('no Arabic string is left as its English source', () => {
 test('every interpolation variable survives translation', () => {
   // `{{godName}}` mistyped is a literal "{{godname}}" on screen, and i18next
   // will not warn. This is the highest-frequency way a locale file breaks.
-  const e = pathsOf(en), a = pathsOf(ar), z = pathsOf(zh);
+  const e = pathsOf(enShared), a = pathsOf(ar), z = pathsOf(zh);
   const vars = (s) => [...String(s).matchAll(/\{\{\s*([\w.]+)\s*\}\}/g)].map((m) => m[1]).sort().join(',');
   const bad = [];
   for (const [k, v] of e) {
@@ -243,7 +246,7 @@ test('every interpolation variable survives translation', () => {
 test('inline markup and array shapes are preserved', () => {
   // Several onboarding strings carry <strong>; the office flavour lines are
   // arrays indexed by the scene, so a short array is an out-of-range read.
-  const e = pathsOf(en), a = pathsOf(ar);
+  const e = pathsOf(enShared), a = pathsOf(ar);
   const tags = (s) => [...String(s).matchAll(/<\/?([a-z]+)>/g)].map((m) => m[1]).sort().join(',');
   for (const [k, v] of e) {
     assert.equal(tags(a.get(k)), tags(v), `markup changed in ${k}`);

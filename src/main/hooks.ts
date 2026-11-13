@@ -268,7 +268,7 @@ export class HookServer {
       this.retryTimer.unref();
     } else if (!this.alerted) {
       this.alerted = true;
-      this.notify('Hive hooks are down', `Nothing is listening at ${sock} (${code}). Every agent hook is being allowed and no cost is recorded until this recovers.`);
+      this.notify('하이브 훅이 멈췄어요', `${sock}에서 수신 중인 곳이 없어요 (${code}). 복구될 때까지 모든 에이전트 훅이 허용되고 비용이 기록되지 않아요.`);
     }
   }
 
@@ -494,7 +494,7 @@ export class HookServer {
       // path bypassed terminal-draft/HITL safety and could spend credits while a
       // user was answering a question. Inbox files remain durable; the renderer
       // wakes the agent later through its guarded idle-only delivery path.
-      this.notify(agentId ?? 'Agent', 'finished — idle');
+      this.notify(agentId ?? '에이전트', '완료 — 대기 중');
       this.emit(agentId, event, p);
       return {};
     }
@@ -588,7 +588,7 @@ export class HookServer {
       (p.notification_type === 'idle' ||
         (p.message ?? '').toLowerCase().includes('waiting for your input'))
     ) {
-      this.notify(agentId ?? 'Agent', p.message ?? 'needs your attention');
+      this.notify(agentId ?? '에이전트', p.message ?? '확인이 필요해요');
     }
 
     // Forward everything else to the renderer so avatars reflect real activity.

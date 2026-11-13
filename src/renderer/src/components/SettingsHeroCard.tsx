@@ -110,8 +110,8 @@ export function SettingsHeroCard() {
                   v{pending} is out
                 </span>
                 <PixelButton variant="primary" size="sm" onClick={downloadManually}
-                  title="Download the installer and replace the app yourself. Auto-update is in Updates below.">
-                  download v{pending}
+                  title={t('misc.downloadInstallerTitle')}>
+                  {t('misc.downloadVersion', { version: pending })}
                 </PixelButton>
               </>
             )}

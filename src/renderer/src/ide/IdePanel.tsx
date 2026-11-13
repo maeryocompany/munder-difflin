@@ -623,9 +623,9 @@ export function IdePanel() {
                   <div style={{
                     fontFamily: 'var(--cth-font-display)', fontSize: 8, textTransform: 'uppercase',
                     letterSpacing: 1, color: 'var(--cth-ink-700)'
-                  }}>nothing open</div>
+                  }}>{t('app.nothingOpen')}</div>
                   <div style={{ fontFamily: 'var(--cth-font-ui)', fontSize: 13 }}>
-                    Pick a file from the tree to edit, or a changed file to diff.
+                    {t('app.pickFile')}
                   </div>
                   <ShortcutHint />
                 </div>
@@ -844,6 +844,7 @@ function MdPane({ rel, root, source, split, onOpenMarkdownLink }: {
  * moment the pane has nothing to say, and it must not compete with an open file.
  */
 function ShortcutHint() {
+  const { t } = useTranslation();
   return (
     <div style={{
       marginTop: 10, display: 'grid', gap: 2, justifyItems: 'center',
@@ -852,7 +853,7 @@ function ShortcutHint() {
       {EDITOR_SHORTCUTS.map(([keys, label]) => (
         <div key={label} style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
           <span style={{ fontFamily: 'var(--cth-font-mono)', color: 'var(--cth-ink-500)' }}>{keys}</span>
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </div>
       ))}
     </div>
@@ -866,18 +867,18 @@ const IS_MAC = typeof navigator !== 'undefined' && /mac/i.test(navigator.userAge
 /** Monaco's own default bindings — do not invent entries here. */
 const EDITOR_SHORTCUTS: ReadonlyArray<readonly [string, string]> = IS_MAC
   ? [
-      ['⌘F', 'find in file'],
-      ['⌥⌘F', 'replace'],
-      ['F1', 'command palette'],
-      ['⌃G', 'go to line'],
-      ['⇧⌘O', 'go to symbol']
+      ['⌘F', 'app.findInFile'],
+      ['⌥⌘F', 'app.replace'],
+      ['F1', 'app.commandPalette'],
+      ['⌃G', 'app.goToLine'],
+      ['⇧⌘O', 'app.goToSymbol']
     ]
   : [
-      ['Ctrl+F', 'find in file'],
-      ['Ctrl+H', 'replace'],
-      ['F1', 'command palette'],
-      ['Ctrl+G', 'go to line'],
-      ['Ctrl+Shift+O', 'go to symbol']
+      ['Ctrl+F', 'app.findInFile'],
+      ['Ctrl+H', 'app.replace'],
+      ['F1', 'app.commandPalette'],
+      ['Ctrl+G', 'app.goToLine'],
+      ['Ctrl+Shift+O', 'app.goToSymbol']
     ];
 
 function Centered({ children, tone }: { children: React.ReactNode; tone?: 'error' }) {

@@ -1267,11 +1267,11 @@ function runBreakerBeat(progressWindowMs: number): void {
     } else if (d.action === 'constrain') {
       hive.send({ to: d.state.agentId, act: 'request', subject: 'Circuit breaker: constrain',
         body: `Automated guardrail escalated: ${reason}. Stop active work now: switch to read-only/plan, write a short plan of your next step, and send it to god for sign-off BEFORE running more tools.` }, 'breaker');
-      breakerToast(`${name} constrained`, reason);
+      breakerToast(`${name} 제한됨`, reason);
     } else if (d.action === 'stop') {
       const ptyId = ptyForAgent(d.state.agentId);
       if (ptyId) { try { ptyManager.kill(ptyId); } catch { /* already gone */ } teardownPty(ptyId); }
-      breakerToast(`${name} stopped by circuit breaker`, reason);
+      breakerToast(`${name}이(가) 차단기로 정지됨`, reason);
     }
   }
 }
@@ -2280,7 +2280,7 @@ ipcMain.handle('hire:drainPending', () => {
 // is validated independently; valid neighbours survive an invalid manifest.
 ipcMain.handle('hire:openFile', async () => {
   const res = await dialog.showOpenDialog({
-    title: 'Import hire manifests',
+    title: '채용 매니페스트 가져오기',
     filters: [{ name: 'Hire manifest', extensions: ['json'] }],
     properties: ['openFile', 'multiSelections']
   });
@@ -2422,11 +2422,11 @@ function createWindow(opts: { floor?: boolean } = {}): BrowserWindow {
       if (owned > 0) {
         const choice = dialog.showMessageBoxSync(win, {
           type: 'warning',
-          buttons: ['Close floor', 'Cancel'],
+          buttons: ['사무실 닫기', '취소'],
           defaultId: 1,
           cancelId: 1,
-          message: `Close this floor? ${owned} running terminal${owned === 1 ? '' : 's'} on it will be stopped.`,
-          detail: 'Other floors keep running.'
+          message: `이 사무실을 닫을까요? 실행 중인 터미널 ${owned}개가 중지돼요.`,
+          detail: '다른 사무실은 계속 실행돼요.'
         });
         if (choice === 1) e.preventDefault();
       }
@@ -2487,17 +2487,17 @@ function openFloor(): BrowserWindow | null {
 function installAppMenu(): void {
   const isMac = process.platform === 'darwin';
   const newFloorItem = {
-    label: 'New Floor',
+    label: '새 사무실',
     accelerator: 'CmdOrCtrl+Shift+N',
     click: () => { openFloor(); }
   };
   const template: Electron.MenuItemConstructorOptions[] = [
     ...(isMac ? [{ role: 'appMenu' as const }] : []),
     {
-      label: 'File',
+      label: '파일',
       submenu: isMac
-        ? [newFloorItem, { type: 'separator' as const }, { role: 'close' as const }]
-        : [newFloorItem, { type: 'separator' as const }, { role: 'quit' as const }]
+        ? [newFloorItem, { type: 'separator' as const }, { role: 'close' as const, label: '창 닫기' }]
+        : [newFloorItem, { type: 'separator' as const }, { role: 'quit' as const, label: '종료' }]
     },
     // The Edit menu is spelled out rather than `{ role: 'editMenu' }` for one
     // reason: `registerAccelerator: false` on the clipboard items.
@@ -2516,19 +2516,43 @@ function installAppMenu(): void {
     // handler and the textarea's native paste event both read the clipboard
     // synchronously, inside the keystroke, before any restore can land.
     {
-      label: 'Edit',
+      label: '편집',
       submenu: [
-        { role: 'undo' as const, registerAccelerator: false },
-        { role: 'redo' as const, registerAccelerator: false },
+        { role: 'undo' as const, label: '실행 취소', registerAccelerator: false },
+        { role: 'redo' as const, label: '다시 실행', registerAccelerator: false },
         { type: 'separator' as const },
-        { role: 'cut' as const, registerAccelerator: false },
-        { role: 'copy' as const, registerAccelerator: false },
-        { role: 'paste' as const, registerAccelerator: false },
-        { role: 'selectAll' as const, registerAccelerator: false }
+        { role: 'cut' as const, label: '잘라내기', registerAccelerator: false },
+        { role: 'copy' as const, label: '복사', registerAccelerator: false },
+        { role: 'paste' as const, label: '붙여넣기', registerAccelerator: false },
+        { role: 'selectAll' as const, label: '모두 선택', registerAccelerator: false }
       ]
     },
-    { role: 'viewMenu' },
-    { role: 'windowMenu' }
+    // Spelled out (instead of the viewMenu/windowMenu roles) so the items carry
+    // Korean labels; the roles themselves are the same ones Electron uses.
+    {
+      label: '보기',
+      submenu: [
+        { role: 'reload' as const, label: '새로고침' },
+        { role: 'forceReload' as const, label: '강제 새로고침' },
+        { role: 'toggleDevTools' as const, label: '개발자 도구' },
+        { type: 'separator' as const },
+        { role: 'resetZoom' as const, label: '실제 크기' },
+        { role: 'zoomIn' as const, label: '확대' },
+        { role: 'zoomOut' as const, label: '축소' },
+        { type: 'separator' as const },
+        { role: 'togglefullscreen' as const, label: '전체 화면' }
+      ]
+    },
+    {
+      label: '창',
+      submenu: [
+        { role: 'minimize' as const, label: '최소화' },
+        { role: 'zoom' as const, label: '확대/축소' },
+        ...(isMac
+          ? [{ type: 'separator' as const }, { role: 'front' as const, label: '모두 앞으로 가져오기' }]
+          : [{ role: 'close' as const, label: '닫기' }])
+      ]
+    }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
@@ -2801,7 +2825,7 @@ async function spawnAgentCore(opts: AgentSpawnOptions, owner: Electron.WebConten
       // A degraded spawn (proxy bridge never bound) is told to the user the same
       // way breaker escalations are: a native toast, gated on the notifications
       // setting. The hive already logged it and pushed hive:degraded to the floor.
-      if (inj.degraded) breakerToast('Agent running degraded', inj.degraded);
+      if (inj.degraded) breakerToast('에이전트가 제한된 상태로 실행 중', inj.degraded);
       // Point the agent's mempalace CLI at the shared palace + the `kg` CLI at the
       // enterprise knowledge store (both no-ops / empty when their flags are off).
       opts.env = { ...(opts.env ?? {}), ...inj.env, ...memory.env(), ...knowledge.env() };
@@ -3111,7 +3135,7 @@ ipcMain.handle('dialog:chooseFolder', async (evt) => {
   if (!win) return { ok: false as const, error: 'no window' };
   const res = await dialog.showOpenDialog(win, {
     properties: ['openDirectory', 'createDirectory'],
-    title: 'Pick a folder'
+    title: '폴더 선택'
   });
   if (res.canceled || res.filePaths.length === 0) return { ok: false as const, error: 'cancelled' };
   return { ok: true as const, path: res.filePaths[0] };
@@ -3702,7 +3726,7 @@ ipcMain.handle('kg:addFiles', async (evt) => {
   if (!win) return { ok: false as const, error: 'no window' };
   const res = await dialog.showOpenDialog(win, {
     properties: ['openFile', 'multiSelections'],
-    title: 'Add documents to the Knowledge Graph'
+    title: '지식 그래프에 문서 추가'
   });
   if (res.canceled || res.filePaths.length === 0) return { ok: false as const, error: 'cancelled' };
   const results = res.filePaths.map((srcPath) => {
@@ -3725,7 +3749,7 @@ ipcMain.handle('dialog:attachFiles', async (evt) => {
   if (!win) return { ok: false as const, error: 'no window' };
   const res = await dialog.showOpenDialog(win, {
     properties: ['openFile', 'multiSelections'],
-    title: 'Attach images or files',
+    title: '이미지나 파일 첨부',
     filters: [
       { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'heic', 'tiff', 'avif'] },
       { name: 'All Files', extensions: ['*'] }
@@ -5319,7 +5343,7 @@ function healthCheckPtys(reason: string, awayMs: number | null): void {
   const away = awayMs != null ? ` (away ~${Math.round(awayMs / 1000)}s)` : '';
   if (dead.length) {
     console.warn(`[power] ${reason}${away}: ${dead.length}/${ptys.length} PTY(s) look wedged (process gone):`, dead.join(', '));
-    breakerToast('Agents need a restart', `${dead.length} agent terminal(s) didn't survive sleep — re-open them to resume.`);
+    breakerToast('에이전트를 다시 시작해야 해요', `에이전트 터미널 ${dead.length}개가 잠자기 후 꺼졌어요 — 다시 열면 이어서 작업해요.`);
   } else {
     console.log(`[power] ${reason}${away}: ${ptys.length} PTY(s) healthy`);
   }

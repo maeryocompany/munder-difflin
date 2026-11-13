@@ -91,13 +91,15 @@ export function setGodName(name: string | undefined | null): void {
   i18n.emit('languageChanged', i18n.language);
 }
 
-/** The saved choice, or English. Never the OS locale — see the note above. */
+/** The saved choice, or Korean. This is the Korean edition, so with nothing
+ *  saved it starts in Korean. Never the OS locale — see the note above. */
+export const DEFAULT_LANGUAGE = 'ko';
 function detectLanguage(): string {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved && SUPPORTED.includes(saved as LanguageCode)) return saved;
-  } catch { /* localStorage unavailable — English it is */ }
-  return 'en';
+  } catch { /* localStorage unavailable — the default it is */ }
+  return DEFAULT_LANGUAGE;
 }
 
 /** Switch language now and persist the choice for next launch. */

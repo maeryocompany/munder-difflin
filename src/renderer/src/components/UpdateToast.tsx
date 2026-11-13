@@ -34,6 +34,7 @@
  * (the same bridge the manual state's button has always used) and the star link
  * goes through the existing `openExternal` opener.
  */
+import { useTranslation } from 'react-i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { summarizeReleaseNotes } from '@shared/releaseNotes';
@@ -81,6 +82,7 @@ function markStarAsked(): void {
 export function UpdateToast() {
   const [status, setStatus] = useState<ToastStatus | null>(null);
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   // Read once per window, so persisting the flag below cannot make the link
   // vanish from under the cursor of the person currently looking at it.
   const [starAsk] = useState(starAskPending);
@@ -231,14 +233,14 @@ export function UpdateToast() {
         <Icon name="sparkle" />
         <span style={{ fontSize: 13, color: 'var(--cth-ink-900)', fontWeight: 600 }}>
           {status.state === 'downloaded'
-            ? `Update v${status.version} downloaded`
-            : `v${status.version} is available`}
+            ? t('updateText.toastDownloaded', { version: status.version })
+            : t('updateText.toastAvailable', { version: status.version })}
         </span>
       </div>
       <span style={{ fontSize: 12, lineHeight: '16px', color: 'var(--cth-ink-700)' }}>
         {status.state === 'downloaded'
-          ? 'Restart Munder Difflin whenever you like to apply it — nothing restarts on its own.'
-          : 'This install can’t update itself — grab the new build from the releases page.'}
+          ? t('updateText.toastDownloadedBody')
+          : t('updateText.toastManualBody')}
       </span>
 
       {notes.length > 0 && (
@@ -247,7 +249,7 @@ export function UpdateToast() {
             fontFamily: 'var(--cth-font-display)', fontSize: 8, lineHeight: '12px',
             color: 'var(--cth-ink-500)', textTransform: 'uppercase'
           }}>
-            What’s new
+            {t('updateText.whatsNew')}
           </div>
           {/* The digest is already capped at ~280 chars; the clamp is the second
               belt, for the day a release body defeats the parser. */}
@@ -271,13 +273,13 @@ export function UpdateToast() {
               href={status.state === 'available-manual' ? status.url : GITHUB_RELEASES_URL}
               onClick={(e) => { e.preventDefault(); openRelease(); }}
               style={linkStyle}
-            >Read more</a>
+            >{t('updateText.readMore')}</a>
             {showStar && (
               <a
                 href={GITHUB_REPO_URL}
                 onClick={(e) => { e.preventDefault(); void window.cth.openExternal(GITHUB_REPO_URL); }}
                 style={linkStyle}
-              >⭐ Star us on GitHub</a>
+              >{t('updateText.starUs')}</a>
             )}
           </div>
         </div>
@@ -288,18 +290,18 @@ export function UpdateToast() {
           onClick={() => setStatus(null)}
           style={{ ...buttonStyle, background: 'var(--cth-cream-100)' }}
         >
-          later
+          {t('updateText.later')}
         </button>
         {status.state === 'downloaded' ? (
           <button onClick={restart} disabled={busy} style={buttonStyle}>
-            {busy ? 'restarting…' : 'restart to update'}
+            {busy ? t('updateText.restarting') : t('updateText.restartToUpdate')}
           </button>
         ) : (
           <button
             onClick={openRelease}
             style={buttonStyle}
           >
-            {hasDownload ? `download ${status.version}` : 'open releases'}
+            {hasDownload ? t('updateText.downloadVersion', { version: status.version }) : t('updateText.openReleases')}
           </button>
         )}
       </div>

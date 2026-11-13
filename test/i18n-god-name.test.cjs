@@ -74,7 +74,8 @@ test('every per-agent string has a call site that actually passes a name', () =>
 });
 
 test('en and zh-CN carry exactly the same keys', () => {
-  const en = Object.keys(flatten(locale('en'))).sort();
+  const KO_EDITION_NS = require('./ko-edition-namespaces.cjs');
+  const en = Object.keys(flatten(locale('en'))).filter((k) => !KO_EDITION_NS.has(k.split('.')[0])).sort();
   const zh = Object.keys(flatten(locale('zh-CN'))).sort();
   assert.deepEqual(zh, en);
 });
@@ -84,7 +85,9 @@ test('every {{placeholder}} in en has the same placeholders in zh-CN', () => {
   const en = flatten(locale('en'));
   const zh = flatten(locale('zh-CN'));
   const vars = (v) => [...new Set((text(v).match(/\{\{(\w+)\}\}/g) || []))].sort();
+  const KO_EDITION_NS = require('./ko-edition-namespaces.cjs');
   const drift = Object.keys(en)
+    .filter((k) => !KO_EDITION_NS.has(k.split('.')[0]))
     .filter((k) => JSON.stringify(vars(en[k])) !== JSON.stringify(vars(zh[k])))
     .map((k) => `${k}: en=${vars(en[k])} zh=${vars(zh[k])}`);
   assert.deepEqual(drift, [], `placeholder drift:\n  ${drift.join('\n  ')}`);
@@ -92,12 +95,13 @@ test('every {{placeholder}} in en has the same placeholders in zh-CN', () => {
 
 // --- the language default ---------------------------------------------------
 
-test('with nothing saved the app starts in English, never the OS locale', () => {
+test('with nothing saved the Korean edition starts in Korean, never the OS locale', () => {
   const src = read('src/renderer/src/i18n/index.ts');
   const fn = src.slice(src.indexOf('function detectLanguage'));
   const body = fn.slice(0, fn.indexOf('\n}'));
   assert.doesNotMatch(body, /navigator/, 'detectLanguage reads the OS locale again');
-  assert.match(body, /return 'en';/, 'detectLanguage does not fall back to English');
+  assert.match(body, /return DEFAULT_LANGUAGE;/, 'detectLanguage does not fall back to the default');
+  assert.match(src, /export const DEFAULT_LANGUAGE = 'ko';/, 'the Korean edition must default to Korean');
 });
 
 test('godName reaches i18next as a default variable, so no call site must pass it', () => {

@@ -33,6 +33,7 @@
  * this large with no visible way out is a trap, so the close is a real control
  * out here even though the drop itself holds none.
  */
+import { useTranslation } from 'react-i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { buildDropSrcDoc } from '../../../shared/releaseDrop';
 
@@ -68,6 +69,7 @@ const REVEAL_TIMEOUT_MS = 2500;
 
 export function ReleaseDrop({ version, html, onDismiss }: ReleaseDropProps) {
   const srcDoc = useMemo(() => buildDropSrcDoc(html), [html]);
+  const { t } = useTranslation();
 
   // The loader covers the frame until it is ready to be seen. `revealed` latches
   // true on the FIRST of two signals — the iframe's onLoad or the timeout cap —
@@ -110,7 +112,7 @@ export function ReleaseDrop({ version, html, onDismiss }: ReleaseDropProps) {
     >
       <div
         role="dialog"
-        aria-label={`What's new in Munder Difflin ${version}`}
+        aria-label={t('releaseDrop.aria', { version })}
         onClick={(e) => e.stopPropagation()}
         style={{
           margin: 'auto',
@@ -150,7 +152,7 @@ export function ReleaseDrop({ version, html, onDismiss }: ReleaseDropProps) {
           }}>
             Munder Difflin <span style={{ color: YELLOW }}>v{version.replace(/^v/, '')}</span>
             <span style={{ color: INK_FAINT, fontWeight: 500, marginLeft: 10, letterSpacing: '.12em' }}>
-              / release notes
+              {t('releaseDrop.releaseNotes')}
             </span>
           </span>
           <span aria-hidden style={{
@@ -161,7 +163,7 @@ export function ReleaseDrop({ version, html, onDismiss }: ReleaseDropProps) {
           </span>
           <button
             onClick={onDismiss}
-            aria-label="Close release notes"
+            aria-label={t('releaseDrop.closeAria')}
             title="Close (Esc)"
             style={{
               flexShrink: 0, width: 26, height: 26, padding: 0,
@@ -183,7 +185,7 @@ export function ReleaseDrop({ version, html, onDismiss }: ReleaseDropProps) {
               authored <a target="_blank"> reach the OS browser, and it carries no
               script, same-origin, form or navigation rights with it. */}
           <iframe
-            title={`What's new in ${version}`}
+            title={t('releaseDrop.frameTitle', { version })}
             srcDoc={srcDoc}
             sandbox="allow-popups"
             referrerPolicy="no-referrer"
